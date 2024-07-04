@@ -4,3 +4,5 @@ spring:
       base-url: http://localhost:11434
       embedding:
         model: gemma:2b
+        options:
+          model: mofanke/acge_text_embedding
