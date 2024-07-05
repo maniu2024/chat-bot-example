@@ -5,7 +5,7 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
-@Document(indexName = "lawArticle")
+@Document(indexName = "law_article")
 @Data
 @ToString
 public class LawArticle {
