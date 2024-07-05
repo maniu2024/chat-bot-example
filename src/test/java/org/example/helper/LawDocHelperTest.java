@@ -8,18 +8,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ESHelperTest {
+public class LawDocHelperTest {
 
 
     @Autowired
-    private ESHelper esHelper;
+    private LawDocHelper lawDocHelper;
 
     @Test
     public void indexData() throws IOException {
-        esHelper.indexData();
+        lawDocHelper.indexData();
     }
 }

@@ -5,6 +5,8 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
+import java.util.List;
+
 @Document(indexName = "law_doc_unit")
 @Data
 @ToString
@@ -23,6 +25,8 @@ public class LawDocUnit {
      * which article and content
      */
     private String unitContent;
+
+    private List<Double> contentVector;
 
 
 }

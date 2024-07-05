@@ -4,8 +4,10 @@ import cn.hutool.core.io.FileUtil;
 import org.example.config.ConfigProperties;
 import org.example.domain.DocChapter;
 import org.example.domain.DocUnit;
+import org.example.domain.EmbeddingResult;
 import org.example.entity.LawDocUnit;
 import org.example.utils.ChapterExtractor;
+import org.example.vector.embd.IVectorEmbedding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
@@ -17,12 +19,15 @@ import java.util.Collection;
 import java.util.List;
 
 @Component
-public class ESHelper {
+public class LawDocHelper {
 
 
     // 直接注入使用
     @Autowired
     private ElasticsearchOperations elasticsearchOperations;
+
+    @Autowired
+    private IVectorEmbedding vectorEmbedding;
 
 
     public void indexData() throws IOException {
@@ -39,6 +44,9 @@ public class ESHelper {
                             lawDocUnit.setLawName(fileName.substring(0,fileName.indexOf(".")));
                             lawDocUnit.setUnitName(u.getUnitName());
                             lawDocUnit.setUnitContent(u.getContent());
+                            // embedding
+                            EmbeddingResult embeddingResult = vectorEmbedding.embedding(u.getContent());
+                            lawDocUnit.setContentVector(embeddingResult.getEmbedding());
                             lawDocUnit.setChapterName(c.getChapterName());
                             return lawDocUnit;
                         }).toList();
