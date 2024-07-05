@@ -17,6 +17,7 @@ public class DefaultVectorEmbedding implements IVectorEmbedding {
     public EmbeddingResult embedding(String text) {
         List<Double> doubles = this.embeddingModel.embed(text);
         EmbeddingResult embeddingResult = new EmbeddingResult();
+        embeddingResult.setText(text);
         embeddingResult.setEmbedding(doubles);
         return embeddingResult;
     }

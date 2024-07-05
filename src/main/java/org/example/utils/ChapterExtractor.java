@@ -1,7 +1,11 @@
 package org.example.utils;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import org.apache.poi.xwpf.usermodel.*;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.example.domain.DocChapter;
+import org.example.domain.DocUnit;
 import org.springframework.util.StringUtils;
 
 import java.io.FileInputStream;
@@ -16,8 +20,10 @@ public class ChapterExtractor {
     }
 
 
-    public static Map<String, List<String>> extractChapters(String filePath) {
+    public static List<DocChapter> extractChapters(String filePath) {
         Map<String, List<String>> resultMap = new LinkedHashMap<>();
+        List<DocChapter> docChapters = new ArrayList<>();
+
         try (FileInputStream fis = new FileInputStream(filePath);
              XWPFDocument document = new XWPFDocument(fis)) {
 
@@ -54,13 +60,32 @@ public class ChapterExtractor {
             // 打印章节标题和内容
             for (int i = 0; i < chapterTitles.size(); i++) {
                 String contents = chapterContents.get(i).toString();
-                List<String> contentList = (List<String>) Arrays.asList(contents.split("\\$\\$"));
-                resultMap.put(chapterTitles.get(i), contentList);
+                List<String> unitList = Arrays.asList(contents.split("\\$\\$"));
+
+                List<DocUnit> docUnitList = unitList.stream()
+                        .filter(StrUtil::isNotEmpty)
+                        .map((u) -> {
+                            u = MyStrUtils.delBlank(u);
+                            DocUnit docUnit = new DocUnit();
+                            String[] split = u.split("\\s+");
+                            if (split.length < 2) {
+                                return null;
+                            }
+                            String unitName = split[0];
+                            docUnit.setUnitName(unitName);
+                            docUnit.setContent(split[1]);
+                            return docUnit;
+                        }).filter(ObjectUtil::isNotNull).toList();
+
+                DocChapter docChapter = new DocChapter();
+                docChapter.setChapterName(chapterTitles.get(i));
+                docChapter.setDocUnitList(docUnitList);
+                docChapters.add(docChapter);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return resultMap;
+        return docChapters;
     }
 }

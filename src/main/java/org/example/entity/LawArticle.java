@@ -5,7 +5,7 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
-@Document(indexName = "law_article")
+@Document(indexName = "law_doc_unit")
 @Data
 @ToString
 public class LawArticle {
@@ -17,10 +17,12 @@ public class LawArticle {
 
     private String chapterName;
 
+    private String unitName;
+
     /**
      * which article and content
      */
-    private String articleContent;
+    private String unitContent;
 
 
 }
