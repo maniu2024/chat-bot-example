@@ -23,6 +23,8 @@ public class EmbeddingController {
     @GetMapping("/ai/embedding")
     public Map embed(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
         EmbeddingResponse embeddingResponse = this.embeddingModel.embedForResponse(List.of(message));
+        int size = embeddingResponse.getResult().getOutput().size();
+        System.out.println("size = " + size);
         return Map.of("embedding", embeddingResponse);
     }
 }

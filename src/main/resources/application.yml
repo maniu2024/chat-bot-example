@@ -2,7 +2,7 @@ spring:
   ai:
     ollama:
       base-url: http://localhost:11434
-      embedding:
+      chat:
         model: gemma:2b
-        options:
-          model: mofanke/acge_text_embedding
+      embedding:
+        model: mofanke/acge_text_embedding

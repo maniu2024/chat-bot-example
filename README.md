@@ -10,3 +10,8 @@
 ### 构建索引
 
 
+### run local embedding model 
+- ollama pull embedding model ,then it can use
+- 
+
+
