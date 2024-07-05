@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import org.example.config.ConfigProperties;
 import org.example.domain.DocChapter;
 import org.example.domain.DocUnit;
-import org.example.entity.LawArticle;
+import org.example.entity.LawDocUnit;
 import org.example.utils.ChapterExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -14,9 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class ESHelper {
@@ -37,18 +35,18 @@ public class ESHelper {
             List<IndexQuery> queries = docChapters.stream().map((c) -> {
                         List<DocUnit> docUnitList = c.getDocUnitList();
                         return docUnitList.stream().map((u) -> {
-                            LawArticle lawArticle = new LawArticle();
-                            lawArticle.setLawName(fileName.substring(0,fileName.indexOf(".")));
-                            lawArticle.setUnitName(u.getUnitName());
-                            lawArticle.setUnitContent(u.getContent());
-                            lawArticle.setChapterName(c.getChapterName());
-                            return lawArticle;
+                            LawDocUnit lawDocUnit = new LawDocUnit();
+                            lawDocUnit.setLawName(fileName.substring(0,fileName.indexOf(".")));
+                            lawDocUnit.setUnitName(u.getUnitName());
+                            lawDocUnit.setUnitContent(u.getContent());
+                            lawDocUnit.setChapterName(c.getChapterName());
+                            return lawDocUnit;
                         }).toList();
                     }).flatMap(Collection::stream)
                     .map((a) -> new IndexQueryBuilder().withObject(a).build())
                     .toList();
 
-            elasticsearchOperations.bulkIndex(queries, LawArticle.class);
+            elasticsearchOperations.bulkIndex(queries, LawDocUnit.class);
         }
     }
 

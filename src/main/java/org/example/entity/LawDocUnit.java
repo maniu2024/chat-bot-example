@@ -8,7 +8,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @Document(indexName = "law_doc_unit")
 @Data
 @ToString
-public class LawArticle {
+public class LawDocUnit {
 
     @Id
     private Integer id;
