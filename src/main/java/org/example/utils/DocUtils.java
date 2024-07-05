@@ -17,7 +17,7 @@ public class DocUtils {
      * @return
      * @throws IOException
      */
-    public String readDocFile(String fileName) throws IOException {
+    public static String readDocFile(String fileName) throws IOException {
         File file = new File(fileName);
         FileInputStream fis = null;
         XWPFDocument document = null;
