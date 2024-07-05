@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import org.example.domain.EmbeddingResult;
+import org.example.vector.embd.IVectorEmbedding;
 import org.springframework.ai.embedding.EmbeddingClient;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +15,12 @@ import java.util.Map;
 @RestController
 public class EmbeddingController {
  
-    private final EmbeddingClient embeddingModel;
- 
+
     @Autowired
-    public EmbeddingController(EmbeddingClient embeddingModel) {
-        this.embeddingModel = embeddingModel;
-    }
+    private IVectorEmbedding embedding;
  
     @GetMapping("/ai/embedding")
-    public Map embed(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
-        EmbeddingResponse embeddingResponse = this.embeddingModel.embedForResponse(List.of(message));
-        int size = embeddingResponse.getResult().getOutput().size();
-        System.out.println("size = " + size);
-        return Map.of("embedding", embeddingResponse);
+    public EmbeddingResult embed(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+        return this.embedding.embedding(message);
     }
 }
