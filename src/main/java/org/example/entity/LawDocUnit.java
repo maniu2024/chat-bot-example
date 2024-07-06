@@ -13,7 +13,7 @@ import java.util.List;
 public class LawDocUnit {
 
     @Id
-    private Integer id;
+    private String id;
 
     private String lawName;
 

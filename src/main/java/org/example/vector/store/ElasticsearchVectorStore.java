@@ -1,23 +1,34 @@
 package org.example.vector.store;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import co.elastic.clients.elasticsearch._types.Script;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.EmbeddingResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.IndexQuery;
-import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.ScriptType;
+
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import redis.clients.jedis.search.querybuilder.QueryBuilders;
 
 import java.util.*;
 
 @Slf4j
 @Component
 public class ElasticsearchVectorStore implements IVectorStore {
+
+    @Autowired
+    private RestTemplate restTemplate;
 
 
 
@@ -42,26 +53,58 @@ public class ElasticsearchVectorStore implements IVectorStore {
 
 
 
-//    public String retrieval(String collectionName,double[] vector) {
-//        // Build the script,查询向量
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("query_vector", vector);
-//        // 计算cos值+1，避免出现负数的情况，得到结果后，实际score值在减1再计算
-//        Script script = new Script(ScriptType.INLINE, Script.DEFAULT_SCRIPT_LANG, "cosineSimilarity(params.query_vector, 'vector')+1", params);
-//        ScriptScoreQueryBuilder scriptScoreQueryBuilder = new ScriptScoreQueryBuilder(QueryBuilders.boolQuery(), script);
-//        // 构建请求
-//        NativeSearchQuery nativeSearchQuery = new NativeSearchQueryBuilder()
-//                .withQuery(scriptScoreQueryBuilder)
-//                .withPageable(Pageable.ofSize(3)).build();
-//        SearchHits<ElasticVectorData> dataSearchHits = this.elasticsearchRestTemplate.search(nativeSearchQuery, ElasticVectorData.class, IndexCoordinates.of(collectionName));
-//        //log.info("检索成功，size:{}", dataSearchHits.getTotalHits());
-//        List<SearchHit<ElasticVectorData>> data = dataSearchHits.getSearchHits();
-//        List<String> results = new LinkedList<>();
-//        for (SearchHit<ElasticVectorData> ele : data) {
-//            results.add(ele.getContent().getContent());
-//        }
-//        return CollectionUtil.join(results,"");
-//    }
+    public String retrieval(String collectionName,Double[] vector) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        JSONArray vecArray = JSONUtil.parseArray(vector);
+
+        String body = "{\n" +
+                "  \"query\": {\n" +
+                "    \"function_score\": {\n" +
+                "      \"query\": {\n" +
+                "        \"match_all\": {}\n" +
+                "      },\n" +
+                "      \"functions\": [\n" +
+                "        {\n" +
+                "          \"script_score\": {\n" +
+                "            \"script\": {\n" +
+                "              \"source\": \"cosineSimilarity(params.vec, 'contentVector') + 1.0\",\n" +
+                "              \"params\": {\n" +
+                "                \"vec\":  []          }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        JSONObject bean = JSONUtil.toBean(body, JSONObject.class, false);
+        JSONObject paramsObj = bean.get("query",JSONObject.class).get("function_score",JSONObject.class)
+                .get("functions",JSONArray.class).get(0,JSONObject.class)
+                .get("script_score",JSONObject.class).get("script",JSONObject.class)
+                .get("params",JSONObject.class);
+        //JSONObject paramsObj = bean.getByPath("query.function_score.functions[0].script_score.script.params", JSONObject.class);
+        paramsObj.set("vec",vecArray);
+        bean.set("params",paramsObj);
+
+        System.out.println("bean.toString() = " + bean.toString());
+
+
+
+
+
+        HttpEntity<String> entity = new HttpEntity<>(bean.toString(), headers);
+        ResponseEntity<String> exchange = restTemplate.exchange(
+                "http://localhost:9200/law_doc_unit/_search",
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        return exchange.getBody();
+    }
 
 
 }
