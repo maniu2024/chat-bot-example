@@ -1,39 +1,29 @@
 package org.example.vector.store;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.json.JSON;
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
-import co.elastic.clients.elasticsearch._types.Script;
+
 import lombok.extern.slf4j.Slf4j;
+import org.example.domain.DocUnit;
 import org.example.domain.EmbeddingResult;
+import org.example.entity.LawDocUnit;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
-import org.springframework.data.elasticsearch.core.IndexedObjectInformation;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-
-import org.springframework.http.*;
+import org.springframework.data.elasticsearch.core.query.SearchTemplateQuery;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import redis.clients.jedis.search.querybuilder.QueryBuilders;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Component
 public class ElasticsearchVectorStore implements IVectorStore {
 
+    private final static String ID = "vector_query_id_4";
+    private final static Integer TOP_N = 10;
     @Autowired
-    private RestTemplate restTemplate;
+    private ElasticsearchOperations operations;
 
-
-
-
-    public void store(String collectionName, List<EmbeddingResult> embeddingResults){
+    public void store(String collectionName, List<EmbeddingResult> embeddingResults) {
         //保存向量
 //        log.info("save vector,collection:{},size:{}",collectionName, CollectionUtil.size(embeddingResults));
 //
@@ -52,58 +42,18 @@ public class ElasticsearchVectorStore implements IVectorStore {
     }
 
 
+    public List<DocUnit> retrieval(String collectionName, List<Double> embedding) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("vec", embedding);
 
-    public String retrieval(String collectionName,Double[] vector) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        SearchTemplateQuery query = SearchTemplateQuery.builder().withId(ID).withParams(map).build();
 
-        JSONArray vecArray = JSONUtil.parseArray(vector);
+        SearchHits<LawDocUnit> searchHits = operations.search(query, LawDocUnit.class);
+        List<SearchHit<LawDocUnit>> searchHitsResult = searchHits.getSearchHits();
 
-        String body = "{\n" +
-                "  \"query\": {\n" +
-                "    \"function_score\": {\n" +
-                "      \"query\": {\n" +
-                "        \"match_all\": {}\n" +
-                "      },\n" +
-                "      \"functions\": [\n" +
-                "        {\n" +
-                "          \"script_score\": {\n" +
-                "            \"script\": {\n" +
-                "              \"source\": \"cosineSimilarity(params.vec, 'contentVector') + 1.0\",\n" +
-                "              \"params\": {\n" +
-                "                \"vec\":  []          }\n" +
-                "            }\n" +
-                "          }\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
-
-        JSONObject bean = JSONUtil.toBean(body, JSONObject.class, false);
-        JSONObject paramsObj = bean.get("query",JSONObject.class).get("function_score",JSONObject.class)
-                .get("functions",JSONArray.class).get(0,JSONObject.class)
-                .get("script_score",JSONObject.class).get("script",JSONObject.class)
-                .get("params",JSONObject.class);
-        //JSONObject paramsObj = bean.getByPath("query.function_score.functions[0].script_score.script.params", JSONObject.class);
-        paramsObj.set("vec",vecArray);
-        bean.set("params",paramsObj);
-
-        System.out.println("bean.toString() = " + bean.toString());
-
-
-
-
-
-        HttpEntity<String> entity = new HttpEntity<>(bean.toString(), headers);
-        ResponseEntity<String> exchange = restTemplate.exchange(
-                "http://localhost:9200/law_doc_unit/_search",
-                HttpMethod.POST,
-                entity,
-                String.class
-        );
-
-        return exchange.getBody();
+        return searchHitsResult.stream().limit(TOP_N).map((s) -> (DocUnit)s.getContent()).peek((d) ->{
+            System.out.println("final retrieval doc:" + d.getUnitName() +  d.getUnitContent());
+        }).toList();
     }
 
 

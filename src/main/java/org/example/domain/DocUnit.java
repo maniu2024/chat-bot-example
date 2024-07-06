@@ -7,6 +7,6 @@ public class DocUnit {
 
     private String unitName;
 
-    private String content;
+    private String unitContent;
 
 }

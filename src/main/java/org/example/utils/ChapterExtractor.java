@@ -73,7 +73,7 @@ public class ChapterExtractor {
                             }
                             String unitName = split[0];
                             docUnit.setUnitName(unitName);
-                            docUnit.setContent(split[1]);
+                            docUnit.setUnitContent(split[1]);
                             return docUnit;
                         }).filter(ObjectUtil::isNotNull).toList();
 

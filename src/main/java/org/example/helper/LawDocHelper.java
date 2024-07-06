@@ -43,9 +43,9 @@ public class LawDocHelper {
                             LawDocUnit lawDocUnit = new LawDocUnit();
                             lawDocUnit.setLawName(fileName.substring(0,fileName.indexOf(".")));
                             lawDocUnit.setUnitName(u.getUnitName());
-                            lawDocUnit.setUnitContent(u.getContent());
+                            lawDocUnit.setUnitContent(u.getUnitContent());
                             // embedding
-                            EmbeddingResult embeddingResult = vectorEmbedding.embedding(u.getContent());
+                            EmbeddingResult embeddingResult = vectorEmbedding.embedding(u.getUnitContent());
                             lawDocUnit.setContentVector(embeddingResult.getEmbedding());
                             lawDocUnit.setChapterName(c.getChapterName());
                             return lawDocUnit;

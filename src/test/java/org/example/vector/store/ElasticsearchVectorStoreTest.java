@@ -25,6 +25,6 @@ public class ElasticsearchVectorStoreTest {
 
         String text = "hi";
         EmbeddingResult ret = embedding.embedding(text);
-        String retrieval = vectorStore.retrieval("", ret.getEmbedding().toArray(new Double[0]));
+        vectorStore.retrieval("", ret.getEmbedding());
     }
 }
