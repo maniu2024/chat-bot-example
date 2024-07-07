@@ -7,7 +7,7 @@ import org.example.domain.DocUnit;
 import org.example.domain.EmbeddingResult;
 import org.example.entity.LawDocUnit;
 import org.example.utils.ChapterExtractor;
-import org.example.vector.embd.IVectorEmbedding;
+import org.example.knowledge.embd.IVectorEmbedding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
@@ -41,7 +41,7 @@ public class LawDocHelper {
                         List<DocUnit> docUnitList = c.getDocUnitList();
                         return docUnitList.stream().map((u) -> {
                             LawDocUnit lawDocUnit = new LawDocUnit();
-                            lawDocUnit.setLawName(fileName.substring(0,fileName.indexOf(".")));
+                            lawDocUnit.setDocName(fileName.substring(0,fileName.indexOf(".")));
                             lawDocUnit.setUnitName(u.getUnitName());
                             lawDocUnit.setUnitContent(u.getUnitContent());
                             // embedding

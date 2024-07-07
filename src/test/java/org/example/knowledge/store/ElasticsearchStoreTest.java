@@ -1,30 +1,29 @@
-package org.example.vector.store;
+package org.example.knowledge.store;
 
 import org.example.domain.EmbeddingResult;
-import org.example.vector.embd.IVectorEmbedding;
+import org.example.entity.LawDocUnit;
+import org.example.knowledge.embd.IVectorEmbedding;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.*;
-
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class ElasticsearchVectorStoreTest {
+public class ElasticsearchStoreTest {
 
     @Autowired
-    private IVectorStore vectorStore;
+    private IKnowledgeStore vectorStore;
 
     @Autowired
     private IVectorEmbedding embedding;
 
     @Test
-    public void retrieval() {
+    public void retrieveByVector() {
 
         String text = "hi";
         EmbeddingResult ret = embedding.embedding(text);
-        vectorStore.retrieval("", ret.getEmbedding());
+        vectorStore.retrieveByVector(ret.getEmbedding(), LawDocUnit.class);
     }
 }

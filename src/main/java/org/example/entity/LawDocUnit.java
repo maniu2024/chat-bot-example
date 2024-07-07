@@ -5,6 +5,7 @@ import lombok.ToString;
 import org.example.domain.DocUnit;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.WriteOnlyProperty;
 
 import java.util.List;
 
@@ -13,13 +14,7 @@ import java.util.List;
 @ToString
 public class LawDocUnit extends DocUnit {
 
-    @Id
-    private String id;
-
-    private String lawName;
-
-    private String chapterName;
-
+    @WriteOnlyProperty
     private List<Double> contentVector;
 
 

@@ -3,9 +3,12 @@ package org.example.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.DocUnit;
 import org.example.domain.EmbeddingResult;
+import org.example.domain.SearchedDocUnitResult;
+import org.example.entity.LawDocUnit;
+import org.example.knowledge.rerank.ISearchedReranker;
 import org.example.service.ChatService;
-import org.example.vector.embd.IVectorEmbedding;
-import org.example.vector.store.IVectorStore;
+import org.example.knowledge.embd.IVectorEmbedding;
+import org.example.knowledge.store.IKnowledgeStore;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.ollama.OllamaChatClient;
@@ -24,25 +27,45 @@ public class ChatServiceImpl implements ChatService {
     private IVectorEmbedding embedding;
 
     @Autowired
-    private IVectorStore vectorStore;
+    private IKnowledgeStore vectorStore;
 
     @Autowired
     private OllamaChatClient chatClient;
 
+    @Autowired
+    private ISearchedReranker reranker;
+
+
+
+
     @Override
     public String chat(String text) {
+
         // todo add fulltext search
         EmbeddingResult embeddingResult = embedding.embedding(text);
 
-        // dense query
-        List<DocUnit> queryResult = vectorStore.retrieval("", embeddingResult.getEmbedding());
+        List<SearchedDocUnitResult<LawDocUnit>> results = vectorStore.retrieveByMix(text, embeddingResult.getEmbedding(), LawDocUnit.class);
 
-        // todo rerank
+        List<SearchedDocUnitResult<LawDocUnit>> rerankResult = reranker.rerank(results);
+
+
         String prompt = text;
 
-        String queryResultStr = queryResult.stream().map(DocUnit::getUnitContent).collect(Collectors.joining("\r\n"));
+        String queryResultStr = rerankResult.stream().map(SearchedDocUnitResult::getDocUnit)
+                .map((r) ->{
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(r.getUnitContent())
+                            .append("\t该资料出自《")
+                            .append(r.getDocName())
+                            .append("》")
+                            .append("中的")
+                            .append(r.getChapterName())
+                            .append("中的")
+                            .append(r.getUnitName());
+                    return sb.toString();
+                }).collect(Collectors.joining("\r\n"));
 
-        prompt += "请参考以下已有事实内容进行回答，已有事实：" + queryResultStr;
+        prompt += "\r\n请参考以下已有资料进行回答，已有资料：" + queryResultStr;
 
         log.info("prompt: {}", prompt);
         ChatResponse response = chatClient.call(

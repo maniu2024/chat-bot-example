@@ -1,8 +1,6 @@
-package org.example.vector.embd;
+package org.example.knowledge.embd;
 
 import org.example.domain.EmbeddingResult;
-
-import java.util.List;
 
 public interface IVectorEmbedding {
 

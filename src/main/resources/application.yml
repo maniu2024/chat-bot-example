@@ -3,6 +3,6 @@ spring:
     ollama:
       base-url: http://localhost:11434
       chat:
-        model: gemma:2b
+        model: gemma
       embedding:
         model: mofanke/acge_text_embedding

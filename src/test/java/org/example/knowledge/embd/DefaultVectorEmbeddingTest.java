@@ -1,4 +1,4 @@
-package org.example.vector.embd;
+package org.example.knowledge.embd;
 
 import jakarta.annotation.Resource;
 import org.example.domain.EmbeddingResult;

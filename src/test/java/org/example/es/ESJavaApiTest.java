@@ -1,4 +1,4 @@
-package org.example.ollama;
+package org.example.es;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.GetResponse;
