@@ -51,7 +51,7 @@ public class RedisConfig {
         // 全局开启AutoType，不建议使用
         // ParserConfig.getGlobalInstance().setAutoTypeSupport(true);
         // 建议使用这种方式，小范围指定白名单，需要序列化的类
-//        ParserConfig.getGlobalInstance().addAccept("com.avatar");
+        ParserConfig.getGlobalInstance().addAccept("org.example.domain.UserContextMessage");
         // key的序列化采用StringRedisSerializer
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());

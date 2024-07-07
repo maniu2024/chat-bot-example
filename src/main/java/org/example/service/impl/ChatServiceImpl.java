@@ -3,6 +3,7 @@ package org.example.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.EmbeddingResult;
 import org.example.domain.SearchedDocUnitResult;
+import org.example.domain.UserSendMessage;
 import org.example.entity.LawDocUnit;
 import org.example.knowledge.embd.IKnowledgeEmbedding;
 import org.example.knowledge.rerank.ISearchedReranker;
@@ -44,7 +45,9 @@ public class ChatServiceImpl implements ChatService {
 
 
     @Override
-    public String chat(String text) {
+    public String chat(UserSendMessage userSendMessage) {
+
+        String text = userSendMessage.getMessage();
 
         StopWatch st = new StopWatch();
         st.start("embedding");
@@ -57,6 +60,9 @@ public class ChatServiceImpl implements ChatService {
         st.start("rerank");
         List<SearchedDocUnitResult<LawDocUnit>> rerankResult = reranker.rerank(results);
         st.stop();
+
+
+
         String userPrompt = text;
 
         String queryResultStr = rerankResult.stream().map(SearchedDocUnitResult::getDocUnit)
