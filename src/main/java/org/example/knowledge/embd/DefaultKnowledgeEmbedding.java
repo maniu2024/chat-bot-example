@@ -1,7 +1,7 @@
 package org.example.knowledge.embd;
 
 import org.example.domain.EmbeddingResult;
-import org.springframework.ai.embedding.EmbeddingClient;
+import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public class DefaultKnowledgeEmbedding implements IKnowledgeEmbedding {
 
     @Autowired
-    private EmbeddingClient embeddingModel;
+    private EmbeddingModel embeddingModel;
 
     @Override
     public EmbeddingResult embedding(String text) {
