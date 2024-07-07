@@ -1,7 +1,7 @@
 package org.example.controller;
 
 import org.example.domain.EmbeddingResult;
-import org.example.knowledge.embd.IVectorEmbedding;
+import org.example.knowledge.embd.IKnowledgeEmbedding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,7 +12,7 @@ public class EmbeddingController {
  
 
     @Autowired
-    private IVectorEmbedding embedding;
+    private IKnowledgeEmbedding embedding;
  
     @GetMapping("/ai/embedding")
     public EmbeddingResult embed(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {

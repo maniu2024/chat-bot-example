@@ -1,42 +1,53 @@
 package org.example.helper;
 
 import cn.hutool.core.io.FileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.example.config.ConfigProperties;
 import org.example.domain.DocChapter;
 import org.example.domain.DocUnit;
 import org.example.domain.EmbeddingResult;
 import org.example.entity.LawDocUnit;
-import org.example.knowledge.embd.IVectorEmbedding;
+import org.example.knowledge.embd.IKnowledgeEmbedding;
 import org.example.knowledge.store.IKnowledgeStore;
 import org.example.utils.ChapterExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 @Component
 public class LawDocHelper {
 
     @Autowired
-    private IVectorEmbedding vectorEmbedding;
+    private IKnowledgeEmbedding vectorEmbedding;
 
     @Autowired
     private IKnowledgeStore knowledgeStore;
 
-    public void indexData() throws IOException {
-        // read files
-        List<String> strings = FileUtil.listFileNames(ConfigProperties.DATA_DIR);
-        for (String fileName : strings) {
-            String path = ConfigProperties.DATA_DIR + "/" + fileName;
+    // get filePath under dir
+    public List<String> getFilePaths(String dirPath) {
+        List<String> fileNames = FileUtil.listFileNames(dirPath);
+        List<String> paths = fileNames.stream().map((f) -> dirPath + File.separator + f).toList();
+        return paths;
+    }
+
+    public void indexData(String dirPath) throws IOException {
+        List<String> filePaths = getFilePaths(dirPath);
+        for (String path : filePaths) {
             List<DocChapter> docChapters = ChapterExtractor.extractChapters(path);
+            String fileName = path.substring(path.lastIndexOf(File.separator),path.lastIndexOf("."));
+            log.info("building {}" , fileName);
+
 
             List<LawDocUnit> list = docChapters.stream().map((c) -> {
                         List<DocUnit> docUnitList = c.getDocUnitList();
                         return docUnitList.stream().map((u) -> {
                             LawDocUnit lawDocUnit = new LawDocUnit();
-                            lawDocUnit.setDocName(fileName.substring(0, fileName.indexOf(".")));
+                            lawDocUnit.setDocName(fileName);
                             lawDocUnit.setUnitName(u.getUnitName());
                             lawDocUnit.setUnitContent(u.getUnitContent());
                             // embedding
@@ -47,7 +58,8 @@ public class LawDocHelper {
                         }).toList();
                     }).flatMap(Collection::stream)
                     .toList();
-            knowledgeStore.bulkStore(list,LawDocUnit.class);
+            knowledgeStore.bulkStore(list, LawDocUnit.class);
+            log.info("build {} success" , fileName);
         }
     }
 }

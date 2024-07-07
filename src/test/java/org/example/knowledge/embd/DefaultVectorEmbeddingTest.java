@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class DefaultVectorEmbeddingTest {
 
     @Resource
-    private IVectorEmbedding embedding;
+    private IKnowledgeEmbedding embedding;
 
     @Test
     public void embedding() {

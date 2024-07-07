@@ -3,7 +3,7 @@ package org.example.es;
 import jakarta.annotation.Resource;
 import org.example.domain.EmbeddingResult;
 import org.example.entity.LawDocUnit;
-import org.example.knowledge.embd.IVectorEmbedding;
+import org.example.knowledge.embd.IKnowledgeEmbedding;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class ESTest {
     @Autowired
     private ElasticsearchOperations operations;
     @Resource
-    private IVectorEmbedding embedding;
+    private IKnowledgeEmbedding embedding;
 
     @Test
     public void createQueryTemplate() {

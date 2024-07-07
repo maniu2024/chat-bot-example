@@ -1,18 +1,16 @@
 package org.example.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.domain.DocUnit;
 import org.example.domain.EmbeddingResult;
 import org.example.domain.SearchedDocUnitResult;
 import org.example.entity.LawDocUnit;
+import org.example.knowledge.embd.IKnowledgeEmbedding;
 import org.example.knowledge.rerank.ISearchedReranker;
-import org.example.service.ChatService;
-import org.example.knowledge.embd.IVectorEmbedding;
 import org.example.knowledge.store.IKnowledgeStore;
+import org.example.service.ChatService;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.ollama.OllamaChatClient;
-import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
@@ -25,7 +23,7 @@ import java.util.stream.Collectors;
 public class ChatServiceImpl implements ChatService {
 
     @Autowired
-    private IVectorEmbedding embedding;
+    private IKnowledgeEmbedding embedding;
 
     @Autowired
     private IKnowledgeStore vectorStore;
@@ -54,7 +52,7 @@ public class ChatServiceImpl implements ChatService {
         String prompt = text;
 
         String queryResultStr = rerankResult.stream().map(SearchedDocUnitResult::getDocUnit)
-                .map((r) ->{
+                .map((r) -> {
                     StringBuilder sb = new StringBuilder();
                     sb.append(r.getUnitContent())
                             .append("\t该资料出自《")
@@ -72,12 +70,7 @@ public class ChatServiceImpl implements ChatService {
         log.info("prompt: {}", prompt);
         st.start("LLM");
         ChatResponse response = chatClient.call(
-                new Prompt(
-                        prompt,
-                        OllamaOptions.create()
-                                .withModel("gemma:2b")
-                                .withTemperature(0.4f)
-                ));
+                new Prompt(prompt));
         st.stop();
 
         String content = response.getResult().getOutput().getContent();

@@ -2,7 +2,6 @@ package org.example.knowledge.store;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.DocUnit;
-import org.example.domain.EmbeddingResult;
 import org.example.domain.SearchedDocUnitResult;
 import org.example.enums.RetrievalType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -32,13 +30,12 @@ public class ElasticsearchStore implements IKnowledgeStore {
     private ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
 
-
     @Override
-    public <T extends DocUnit>  void bulkStore(List<T> docUnits,Class<T> clazz) {
+    public <T extends DocUnit> void bulkStore(List<T> docUnits, Class<T> clazz) {
         List<IndexQuery> indexQueries = docUnits.stream().map((docUnit -> {
             return new IndexQueryBuilder().withObject(docUnit).build();
         })).toList();
-        operations.bulkIndex(indexQueries,clazz);
+        operations.bulkIndex(indexQueries, clazz);
     }
 
     public <T extends DocUnit> List<SearchedDocUnitResult<T>> retrieveByVector(List<Double> embedding, Class<T> clazz) {
@@ -61,7 +58,7 @@ public class ElasticsearchStore implements IKnowledgeStore {
                 })
                 .peek((d) -> {
                     DocUnit docUnit = d.getDocUnit();
-                    log.info("final retrieval doc: {},{},{} ,{}" ,d.getScore(),docUnit.getChapterName(), docUnit.getUnitName() , docUnit.getUnitContent());
+                    log.info("vector retrieval doc: {},{},{} ,{}", d.getScore(), docUnit.getChapterName(), docUnit.getUnitName(), docUnit.getUnitContent());
                 }).toList();
     }
 
@@ -72,13 +69,17 @@ public class ElasticsearchStore implements IKnowledgeStore {
         SearchHits<T> searchHits = operations.search(query, clazz);
 
         return searchHits.getSearchHits().stream().limit(TOP_N).map((s) -> {
-            T content = s.getContent();
-            SearchedDocUnitResult<T> result = new SearchedDocUnitResult<>();
-            result.setDocUnit(content);
-            result.setScore(s.getScore());
-            result.setRetrievalType(RetrievalType.MATCH);
-            return result;
-        }).toList();
+                    T content = s.getContent();
+                    SearchedDocUnitResult<T> result = new SearchedDocUnitResult<>();
+                    result.setDocUnit(content);
+                    result.setScore(s.getScore());
+                    result.setRetrievalType(RetrievalType.MATCH);
+                    return result;
+                }).peek((d) -> {
+                    DocUnit docUnit = d.getDocUnit();
+                    log.info("match retrieval doc: {},{},{} ,{}", d.getScore(), docUnit.getChapterName(), docUnit.getUnitName(), docUnit.getUnitContent());
+                })
+                .toList();
     }
 
     @Override
@@ -93,7 +94,7 @@ public class ElasticsearchStore implements IKnowledgeStore {
         try {
             byVectorResult = byVectorFuture.get();
             fulltextResult = byMatchFuture.get();
-        }  catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

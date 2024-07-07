@@ -3,6 +3,9 @@ spring:
     ollama:
       base-url: http://localhost:11434
       chat:
-        model: gemma
+        options:
+          temperature: 0.2
+          model: gemma
       embedding:
         model: mofanke/acge_text_embedding
+

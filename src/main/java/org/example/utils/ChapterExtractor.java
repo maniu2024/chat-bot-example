@@ -21,7 +21,6 @@ public class ChapterExtractor {
 
 
     public static List<DocChapter> extractChapters(String filePath) {
-        Map<String, List<String>> resultMap = new LinkedHashMap<>();
         List<DocChapter> docChapters = new ArrayList<>();
 
         try (FileInputStream fis = new FileInputStream(filePath);
@@ -50,7 +49,6 @@ public class ChapterExtractor {
                             if (StrUtil.isNotEmpty(stringBuilder.toString())) {
                                 stringBuilder.append("$$");
                             }
-
                         }
                         stringBuilder.append(text).append("\n");
                     }
@@ -73,7 +71,7 @@ public class ChapterExtractor {
                             }
                             String unitName = split[0];
                             docUnit.setUnitName(unitName);
-                            docUnit.setUnitContent(split[1]);
+                            docUnit.setUnitContent(u.substring(u.indexOf(unitName) + unitName.length()));
                             return docUnit;
                         }).filter(ObjectUtil::isNotNull).toList();
 

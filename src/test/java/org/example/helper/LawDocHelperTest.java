@@ -1,5 +1,6 @@
 package org.example.helper;
 
+import org.example.config.ConfigProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,6 @@ public class LawDocHelperTest {
 
     @Test
     public void indexData() throws IOException {
-        lawDocHelper.indexData();
+        lawDocHelper.indexData(ConfigProperties.DATA_DIR);
     }
 }

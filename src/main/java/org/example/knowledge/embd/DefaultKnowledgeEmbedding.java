@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class DefaultVectorEmbedding implements IVectorEmbedding {
+public class DefaultKnowledgeEmbedding implements IKnowledgeEmbedding {
 
     @Autowired
     private EmbeddingClient embeddingModel;
