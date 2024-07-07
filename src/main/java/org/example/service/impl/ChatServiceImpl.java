@@ -15,6 +15,7 @@ import org.springframework.ai.ollama.OllamaChatClient;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,19 +37,20 @@ public class ChatServiceImpl implements ChatService {
     private ISearchedReranker reranker;
 
 
-
-
     @Override
     public String chat(String text) {
 
+        StopWatch st = new StopWatch();
+        st.start("embedding");
         // todo add fulltext search
         EmbeddingResult embeddingResult = embedding.embedding(text);
-
+        st.stop();
+        st.start("retrieve");
         List<SearchedDocUnitResult<LawDocUnit>> results = vectorStore.retrieveByMix(text, embeddingResult.getEmbedding(), LawDocUnit.class);
-
+        st.stop();
+        st.start("rerank");
         List<SearchedDocUnitResult<LawDocUnit>> rerankResult = reranker.rerank(results);
-
-
+        st.stop();
         String prompt = text;
 
         String queryResultStr = rerankResult.stream().map(SearchedDocUnitResult::getDocUnit)
@@ -65,9 +67,10 @@ public class ChatServiceImpl implements ChatService {
                     return sb.toString();
                 }).collect(Collectors.joining("\r\n"));
 
-        prompt += "\r\n请参考以下已有资料进行回答，已有资料：" + queryResultStr;
+        prompt += "\r\n请参考以下已有资料进行回答,如果参考了资料，需要在回答中返回参考的资料出处.已有资料：" + queryResultStr;
 
         log.info("prompt: {}", prompt);
+        st.start("LLM");
         ChatResponse response = chatClient.call(
                 new Prompt(
                         prompt,
@@ -75,8 +78,10 @@ public class ChatServiceImpl implements ChatService {
                                 .withModel("gemma:2b")
                                 .withTemperature(0.4f)
                 ));
+        st.stop();
 
         String content = response.getResult().getOutput().getContent();
+        log.info(st.prettyPrint());
         return content;
     }
 

@@ -1,5 +1,6 @@
 package org.example.knowledge.rerank;
 
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.DocUnit;
 import org.example.domain.SearchedDocUnitResult;
@@ -13,6 +14,8 @@ import java.util.List;
 @Component
 public class SimpleSearchedReranker implements ISearchedReranker {
 
+
+    private static final Integer TOP_N = 3;
 
 
     @Override
@@ -33,6 +36,7 @@ public class SimpleSearchedReranker implements ISearchedReranker {
 
         List<SearchedDocUnitResult<T>> sortedList = scoredList.stream()
                 .sorted(Comparator.comparing(SearchedDocUnitResult::getScore, Comparator.reverseOrder()))
+                .limit(TOP_N)
                 .toList();
 
         return sortedList;
