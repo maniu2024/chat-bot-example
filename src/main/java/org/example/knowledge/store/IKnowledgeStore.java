@@ -10,6 +10,12 @@ public interface IKnowledgeStore {
 
 
     /**
+     * bulk store knowledge
+     * @param docUnits
+     */
+    public <T extends DocUnit> void bulkStore(List<T> docUnits,Class<T> clazz);
+
+    /**
      * Dense Retriever
      * @param embedding
      * @param clazz

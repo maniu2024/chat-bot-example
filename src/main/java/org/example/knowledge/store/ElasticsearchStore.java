@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.Criteria;
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
-import org.springframework.data.elasticsearch.core.query.SearchTemplateQuery;
+import org.springframework.data.elasticsearch.core.query.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -33,24 +31,15 @@ public class ElasticsearchStore implements IKnowledgeStore {
 
     private ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
-    public void store(String collectionName, List<EmbeddingResult> embeddingResults) {
-        //保存向量
-//        log.info("save vector,collection:{},size:{}",collectionName, CollectionUtil.size(embeddingResults));
-//
-//        List<IndexQuery> results = new ArrayList<>();
-//        for (EmbeddingResult embeddingResult : embeddingResults) {
-//            ElasticVectorData ele = new ElasticVectorData();
-//            ele.setVector(embeddingResult.getEmbedding());
-//            ele.setChunkId(embeddingResult.getRequestId());
-//            ele.setContent(embeddingResult.getPrompt());
-//            results.add(new IndexQueryBuilder().withObject(ele).build());
-//        }
-//        // 构建数据包
-//        List<IndexedObjectInformation> bulkedResult = elasticsearchRestTemplate.bulkIndex(results, IndexCoordinates.of(collectionName));
-//        int size = CollectionUtil.size(bulkedResult);
-//        log.info("保存向量成功-size:{}", size);
-    }
 
+
+    @Override
+    public <T extends DocUnit>  void bulkStore(List<T> docUnits,Class<T> clazz) {
+        List<IndexQuery> indexQueries = docUnits.stream().map((docUnit -> {
+            return new IndexQueryBuilder().withObject(docUnit).build();
+        })).toList();
+        operations.bulkIndex(indexQueries,clazz);
+    }
 
     public <T extends DocUnit> List<SearchedDocUnitResult<T>> retrieveByVector(List<Double> embedding, Class<T> clazz) {
         HashMap<String, Object> map = new HashMap<>();

@@ -6,12 +6,10 @@ import org.example.domain.DocChapter;
 import org.example.domain.DocUnit;
 import org.example.domain.EmbeddingResult;
 import org.example.entity.LawDocUnit;
-import org.example.utils.ChapterExtractor;
 import org.example.knowledge.embd.IVectorEmbedding;
+import org.example.knowledge.store.IKnowledgeStore;
+import org.example.utils.ChapterExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.query.IndexQuery;
-import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,14 +19,11 @@ import java.util.List;
 @Component
 public class LawDocHelper {
 
-
-    // 直接注入使用
-    @Autowired
-    private ElasticsearchOperations elasticsearchOperations;
-
     @Autowired
     private IVectorEmbedding vectorEmbedding;
 
+    @Autowired
+    private IKnowledgeStore knowledgeStore;
 
     public void indexData() throws IOException {
         // read files
@@ -37,11 +32,11 @@ public class LawDocHelper {
             String path = ConfigProperties.DATA_DIR + "/" + fileName;
             List<DocChapter> docChapters = ChapterExtractor.extractChapters(path);
 
-            List<IndexQuery> queries = docChapters.stream().map((c) -> {
+            List<LawDocUnit> list = docChapters.stream().map((c) -> {
                         List<DocUnit> docUnitList = c.getDocUnitList();
                         return docUnitList.stream().map((u) -> {
                             LawDocUnit lawDocUnit = new LawDocUnit();
-                            lawDocUnit.setDocName(fileName.substring(0,fileName.indexOf(".")));
+                            lawDocUnit.setDocName(fileName.substring(0, fileName.indexOf(".")));
                             lawDocUnit.setUnitName(u.getUnitName());
                             lawDocUnit.setUnitContent(u.getUnitContent());
                             // embedding
@@ -51,11 +46,8 @@ public class LawDocHelper {
                             return lawDocUnit;
                         }).toList();
                     }).flatMap(Collection::stream)
-                    .map((a) -> new IndexQueryBuilder().withObject(a).build())
                     .toList();
-
-            elasticsearchOperations.bulkIndex(queries, LawDocUnit.class);
+            knowledgeStore.bulkStore(list,LawDocUnit.class);
         }
     }
-
 }
