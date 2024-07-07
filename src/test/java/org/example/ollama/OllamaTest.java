@@ -6,8 +6,8 @@ import org.junit.runner.RunWith;
 import org.springframework.ai.embedding.Embedding;
 import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
-import org.springframework.ai.ollama.OllamaChatClient;
-import org.springframework.ai.ollama.OllamaEmbeddingClient;
+import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.ai.ollama.OllamaEmbeddingModel;
 import org.springframework.ai.ollama.api.OllamaApi;
 import org.springframework.ai.ollama.api.OllamaOptions;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,7 +25,7 @@ public class OllamaTest {
         String model = "gemma:2b";
 
         var ollamaApi = new OllamaApi();
-        var chatClient = new OllamaChatClient(ollamaApi).withModel(model)
+        var chatClient = new OllamaChatModel(ollamaApi).withModel(model)
                 .withDefaultOptions(OllamaOptions.create()
                         .withModel(model)
                         .withTemperature(0.9f));
@@ -46,7 +46,7 @@ public class OllamaTest {
 
 
     @Resource
-    private OllamaEmbeddingClient embeddingModel;
+    private OllamaEmbeddingModel embeddingModel;
 
 
     @Test

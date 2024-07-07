@@ -8,4 +8,12 @@ spring:
           model: gemma
       embedding:
         model: mofanke/acge_text_embedding
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      lettuce:
+        pool:
+          enabled: true
+
 
