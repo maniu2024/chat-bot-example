@@ -15,7 +15,7 @@ import java.util.List;
 public class SimpleSearchedReranker implements ISearchedReranker {
 
 
-    private static final Integer TOP_N = 3;
+    private static final Integer TOP_N = 5;
 
 
     @Override

@@ -5,7 +5,7 @@ spring:
       chat:
         options:
           temperature: 0.2
-          model: gemma
+          model: qwen
       embedding:
         model: mofanke/acge_text_embedding
   data:
