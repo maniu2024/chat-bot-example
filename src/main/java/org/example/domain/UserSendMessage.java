@@ -7,6 +7,8 @@ public class UserSendMessage {
 
     private String userId;
 
+    private boolean useKnowledge;
+
     private String message;
 
 }
