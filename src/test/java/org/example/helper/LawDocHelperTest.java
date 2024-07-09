@@ -19,7 +19,7 @@ public class LawDocHelperTest {
 
     @Test
     public void indexDataByPath() throws IOException {
-        lawDocHelper.indexDataByFilePath(ConfigProperties.DATA_DIR + "最高人民法院关于审理劳动争议案件适用法律若干问题的解释（四）.docx" );
+        lawDocHelper.indexDataByFilePath(ConfigProperties.DATA_DIR + "中华人民共和国宪法_2018修正版本.docx" );
     }
 
     @Test

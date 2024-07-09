@@ -12,6 +12,7 @@ import org.example.service.ChatService;
 import org.example.service.UserContextService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,12 +54,12 @@ public class ChatServiceImpl implements ChatService {
         boolean useKnowledge = userSendMessage.isUseKnowledge();
 
         String userPrompt = text;
-        String systemPrompt = "";
+        String systemPrompt = "你是一名专业的法律顾问助手，你会以专业的口吻解决用户的问题。";
 
         StopWatch st = new StopWatch();
 
         if (useKnowledge) {
-            userPrompt = "你是一名专业的法律顾问助手，你会以专业的口吻解决用户的问题。下面是用户问题和已有的资料，你可以参考资料进行回复。\r\n";
+            userPrompt = "下面是用户问题和已有的资料，你可以参考资料进行回复。\r\n";
             st.start("embedding");
             EmbeddingResult embeddingResult = embedding.embedding(text);
             st.stop();
@@ -81,7 +82,9 @@ public class ChatServiceImpl implements ChatService {
         }
 
         st.start("LLM");
-        ChatClient chatClient = ChatClient.builder(chatModel).defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory)).build();
+        ChatClient chatClient = ChatClient.builder(chatModel)
+                .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory),new SimpleLoggerAdvisor())
+                .build();
         String content = chatClient.prompt().user(userPrompt).system(systemPrompt).advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, userSendMessage.getUserId()).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100)).call().content();
 
         st.stop();
