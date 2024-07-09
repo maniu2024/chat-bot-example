@@ -1,11 +1,13 @@
+
 spring:
   ai:
     ollama:
       base-url: http://localhost:11434
       chat:
         options:
-          temperature: 0.2
-          model: qwen
+          temperature: 0.8
+          model: qwen2
+          repeat-penalty: 1.2
       embedding:
         model: mofanke/acge_text_embedding
   data:
@@ -15,5 +17,6 @@ spring:
       lettuce:
         pool:
           enabled: true
-
+server:
+  port: 6000
 

@@ -1,17 +1,30 @@
-# 智能问答机器人
+# 基于知识库、大模型的问答对话系统
+ 一个基于SpringAi、Ollama、Elasticsarch技术实现的知识库问答系统.
 
-##  技术栈
-- Springboot
-- Spring Ai
-- Elasticsearch
-- Ollama
+## 功能概述
+ 可以选择是否根据知识库进行提问，如果根据知识库提问，那么就利用RAG检索增强相关技术处理，比如文本切分、Embedding、Rerank、构建上下文等等。
 
-## 技术原理
-### 构建索引
+ 也可以选择不根据知识库提问，那么此时完全依赖大模型本身的能力就行回答问题。
+
+ 不管是不是根据知识库提问，都实现了对话记忆，通过SpringAℹ实现了多伦对话的用户对话历史的存储。
+
+使用开源的嵌入模型对文本进行向量计算，使用Elasticsearch作为向量数据库具备。
+
+我使用的是中国法律数据库的数据，docx格式，按照章节中的每一条进行切分，切分后的每一条作为ES中的每一个文档。
 
 
-### run local embedding model 
-- ollama pull embedding model ,then it can use
-- 
+##  主要技术栈及版本
+- JDK： 21， 使用到虚拟线程进行并行执行混合检索。     
+- Springboot：3.2.7，用于搭建Web应用。
+- Spring Ai：1.0.0，用于大模型的调用、提示词创建、对话记忆等等。
+- Elasticsearch： 8.14，用作向量数据库，通过余弦相似度计算向量相似度。
+- Ollama： 0.1.48，用于下载、部署、运行大模型。
+- Apache Poi: 4.1版本，用于解析word文档
+
+
+
+
+
+
 
 

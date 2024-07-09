@@ -58,6 +58,7 @@ public class ChatServiceImpl implements ChatService {
         StopWatch st = new StopWatch();
 
         if (useKnowledge) {
+            userPrompt = "你是一名专业的法律顾问助手，你会以专业的口吻解决用户的问题。下面是用户问题和已有的资料，你可以参考资料进行回复。\r\n";
             st.start("embedding");
             EmbeddingResult embeddingResult = embedding.embedding(text);
             st.stop();
@@ -68,19 +69,11 @@ public class ChatServiceImpl implements ChatService {
             List<SearchedDocUnitResult<LawDocUnit>> rerankResult = reranker.rerank(results);
             st.stop();
 
-            String queryResultStr = rerankResult.stream().map(SearchedDocUnitResult::getDocUnit)
-                    .map((r) -> {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(r.getUnitContent())
-                                .append("\t该资料出自《")
-                                .append(r.getDocName())
-                                .append("》")
-                                .append("中的")
-                                .append(r.getChapterName())
-                                .append("中的")
-                                .append(r.getUnitName());
-                        return sb.toString();
-                    }).collect(Collectors.joining("\r\n"));
+            String queryResultStr = rerankResult.stream().map(SearchedDocUnitResult::getDocUnit).map((r) -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append(r.getDocName()).append(r.getChapterName()).append(r.getUnitName()).append(r.getUnitContent());
+                return sb.toString();
+            }).collect(Collectors.joining("\r\n"));
 
             userPrompt += "已有资料：" + queryResultStr;
 
@@ -88,14 +81,8 @@ public class ChatServiceImpl implements ChatService {
         }
 
         st.start("LLM");
-        ChatClient chatClient = ChatClient.builder(chatModel)
-                .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory)).build();
-        String content = chatClient.prompt()
-                .user(userPrompt)
-                .system(systemPrompt)
-                .advisors(a -> a
-                        .param(CHAT_MEMORY_CONVERSATION_ID_KEY, userSendMessage.getUserId())
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100)).call().content();
+        ChatClient chatClient = ChatClient.builder(chatModel).defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory)).build();
+        String content = chatClient.prompt().user(userPrompt).system(systemPrompt).advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, userSendMessage.getUserId()).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100)).call().content();
 
         st.stop();
         log.info(st.prettyPrint());

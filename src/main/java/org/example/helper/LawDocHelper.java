@@ -1,8 +1,8 @@
 package org.example.helper;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.example.config.ConfigProperties;
 import org.example.domain.DocChapter;
 import org.example.domain.DocUnit;
 import org.example.domain.EmbeddingResult;
@@ -35,31 +35,41 @@ public class LawDocHelper {
         return paths;
     }
 
-    public void indexData(String dirPath) throws IOException {
+    public void indexDataByFilePath(String path) {
+        List<DocChapter> docChapters = ChapterExtractor.extractChapters(path);
+        String fileName = path.substring(path.lastIndexOf(File.separator),path.lastIndexOf("."));
+        log.info("building {}" , fileName);
+
+
+        List<LawDocUnit> list = docChapters.stream().map((c) -> {
+                    List<DocUnit> docUnitList = c.getDocUnitList();
+                    return docUnitList.stream().map((u) -> {
+                        LawDocUnit lawDocUnit = new LawDocUnit();
+                        lawDocUnit.setDocName(fileName);
+                        lawDocUnit.setUnitName(u.getUnitName());
+                        lawDocUnit.setUnitContent(u.getUnitContent());
+                        // embedding
+                        EmbeddingResult embeddingResult = vectorEmbedding.embedding(u.getUnitContent());
+                        lawDocUnit.setContentVector(embeddingResult.getEmbedding());
+                        lawDocUnit.setChapterName(c.getChapterName());
+                        return lawDocUnit;
+                    }).toList();
+                }).flatMap(Collection::stream)
+                .toList();
+
+        if (CollectionUtil.isEmpty(list)) {
+            return;
+        }
+
+        knowledgeStore.bulkStore(list, LawDocUnit.class);
+        log.info("build {} success" , fileName);
+
+    }
+
+    public void indexDataByDir(String dirPath) throws IOException {
         List<String> filePaths = getFilePaths(dirPath);
         for (String path : filePaths) {
-            List<DocChapter> docChapters = ChapterExtractor.extractChapters(path);
-            String fileName = path.substring(path.lastIndexOf(File.separator),path.lastIndexOf("."));
-            log.info("building {}" , fileName);
-
-
-            List<LawDocUnit> list = docChapters.stream().map((c) -> {
-                        List<DocUnit> docUnitList = c.getDocUnitList();
-                        return docUnitList.stream().map((u) -> {
-                            LawDocUnit lawDocUnit = new LawDocUnit();
-                            lawDocUnit.setDocName(fileName);
-                            lawDocUnit.setUnitName(u.getUnitName());
-                            lawDocUnit.setUnitContent(u.getUnitContent());
-                            // embedding
-                            EmbeddingResult embeddingResult = vectorEmbedding.embedding(u.getUnitContent());
-                            lawDocUnit.setContentVector(embeddingResult.getEmbedding());
-                            lawDocUnit.setChapterName(c.getChapterName());
-                            return lawDocUnit;
-                        }).toList();
-                    }).flatMap(Collection::stream)
-                    .toList();
-            knowledgeStore.bulkStore(list, LawDocUnit.class);
-            log.info("build {} success" , fileName);
+            indexDataByFilePath(path);
         }
     }
 }
