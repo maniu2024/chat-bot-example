@@ -43,13 +43,6 @@ public class ReadWordContent {
 
     private static final String structText = "p";
 
-    public static void main(String[] args) throws Exception {
-        String wordPath = "/data/datasets/中华人民共和国劳动法.docx";
-        ReadWordContent readWordContent = new ReadWordContent();
-        List<StyleTextVO> styleTextVOS = readWordContent.readDoc(wordPath);
-        System.out.println("styleTextVOS = " + styleTextVOS);
-    }
-
     /**
      * 通过XWPFWordExtractor访问XWPFDocument的内容
      * @throws Exception
