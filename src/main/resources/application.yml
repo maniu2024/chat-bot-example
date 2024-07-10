@@ -24,9 +24,13 @@ logging:
     org.springframework.ai.chat.client.advisor: debug
 
 
+app:
+  prompt:
+    system: 你是一名专业的法律顾问助手，你会以专业的口吻解决用户的问题。你可以根据已有资料进行回复，已有资料来自网络查询结果或则本地知识库知识。
+  retriever:
+    web:
+      tavily:
+        base_url: https://api.tavily.com/search
+        api_key: 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
 
-retriever:
-  web:
-    tavily:
-      base_url: https://api.tavily.com/search
-      api_key: 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
+

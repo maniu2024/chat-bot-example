@@ -1,5 +1,6 @@
 package org.example.knowledge.store;
 
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.DocUnit;
 import org.example.domain.SearchedDocUnitResult;
@@ -23,7 +24,17 @@ import java.util.concurrent.Future;
 public class ElasticsearchStore implements IKnowledgeStore {
 
     private final static String ID = "vector_query_id_4";
+
+    /**
+     * 每次检索的数量
+     */
     private final static Integer TOP_N = 10;
+
+    /**
+     * 向量检索的结果的最低值要求，低于该值，直接过滤
+     */
+    private final static Double MIN_SCORE_VECTOR = 1.6;
+
     @Autowired
     private ElasticsearchOperations operations;
 
@@ -48,6 +59,7 @@ public class ElasticsearchStore implements IKnowledgeStore {
         List<SearchHit<T>> searchHitsResult = searchHits.getSearchHits();
 
         return searchHitsResult.stream().limit(TOP_N)
+                .filter((s) -> s.getScore() > MIN_SCORE_VECTOR)
                 .map((s) -> {
                     T docUnit = s.getContent();
                     SearchedDocUnitResult<T> unitResult = new SearchedDocUnitResult<T>();
@@ -75,9 +87,6 @@ public class ElasticsearchStore implements IKnowledgeStore {
                     result.setScore(s.getScore());
                     result.setRetrievalType(RetrievalType.MATCH);
                     return result;
-                }).peek((d) -> {
-                    DocUnit docUnit = d.getDocUnit();
-                    log.info("match retrieval doc: {},{},{} ,{}", d.getScore(), docUnit.getChapterName(), docUnit.getUnitName(), docUnit.getUnitContent());
                 })
                 .toList();
     }
@@ -99,6 +108,11 @@ public class ElasticsearchStore implements IKnowledgeStore {
         }
 
         List<SearchedDocUnitResult<T>> results = new ArrayList<>();
+
+        // 如果向量检索结果为空，则不再考虑关键词检索结果
+        if (CollectionUtil.isEmpty(byVectorResult)) {
+            return results;
+        }
 
         results.addAll(byVectorResult);
         results.addAll(fulltextResult);

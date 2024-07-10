@@ -22,10 +22,10 @@ import java.net.http.HttpResponse;
 @Component
 public class DefaultWebRetriever implements WebRetriever {
 
-    @Value("${retriever.web.tavily.base_url}")
+    @Value("${app.retriever.web.tavily.base_url}")
     private String baseUrl;
 
-    @Value("${retriever.web.tavily.api_key}")
+    @Value("${app.retriever.web.tavily.api_key}")
     private String apiKey;
 
 
