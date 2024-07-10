@@ -51,8 +51,11 @@ public class ChatServiceImpl implements ChatService {
 
     private InMemoryChatMemory chatMemory = new InMemoryChatMemory();
 
-    @Value("${app.prompt.system}")
+    @Value("${app.chat.prompt.system}")
     private String systemPrompt;
+
+    @Value("${app.chat.memory.size}")
+    private Integer chatMemorySize;
 
 
     @Override
@@ -104,7 +107,7 @@ public class ChatServiceImpl implements ChatService {
         String content = chatClient.prompt()
                 .user(userPromptStr)
                 .system(systemPrompt)
-                .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, userSendMessage.getUserId()).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
+                .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, userSendMessage.getUserId()).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, chatMemorySize))
                 .call()
                 .content();
 
