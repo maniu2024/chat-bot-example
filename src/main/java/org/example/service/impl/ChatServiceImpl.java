@@ -100,6 +100,8 @@ public class ChatServiceImpl implements ChatService {
                 已有资料：\{userQueryContext.toString()}
                 """;
 
+        log.info("UserPrompt: {}", userPromptStr);
+
         st.start("LLM");
         ChatClient chatClient = ChatClient.builder(chatModel)
                 .defaultAdvisors(new PromptChatMemoryAdvisor(chatMemory),new SimpleLoggerAdvisor())

@@ -66,8 +66,6 @@ public class DefaultWebRetriever implements WebRetriever {
             return null;
         }
         String body = response.body();
-
-
         WebRetrieveResult webRetrieveResult = JSON.parseObject(body, WebRetrieveResult.class);
         return webRetrieveResult;
     }
