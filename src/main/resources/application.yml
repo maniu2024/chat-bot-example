@@ -22,3 +22,11 @@ server:
 logging:
   level:
     org.springframework.ai.chat.client.advisor: debug
+
+
+
+retriever:
+  web:
+    tavily:
+      base_url: https://api.tavily.com/search
+      api_key: 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
