@@ -57,7 +57,14 @@ public class ChatServiceImpl implements ChatService {
     @Value("${app.chat.memory.size}")
     private Integer chatMemorySize;
 
+    @Value("${app.retriever.web.enable}")
+    private Boolean webSearchEnabled;
 
+
+    /**
+     * @param userSendMessage 用户发送的消息
+     * @return                助手的回复
+     */
     @Override
     public String chat(UserSendMessage userSendMessage) {
 
@@ -76,9 +83,11 @@ public class ChatServiceImpl implements ChatService {
             st.stop();
             // 当本地知识库无相关数据，从网络中获取数据
             if (CollectionUtil.isEmpty(results)) {
-                WebRetrieveResult result = webRetriever.retrieve(query);
-                String resultsStr = JSON.toJSONString(result.getResults());
-                userQueryContext.append(resultsStr);
+                if (webSearchEnabled) {
+                    WebRetrieveResult result = webRetriever.retrieve(query);
+                    String resultsStr = JSON.toJSONString(result.getResults());
+                    userQueryContext.append(resultsStr);
+                }
             } else {
                 st.start("rerank");
                 List<SearchedDocUnitResult<LawDocUnit>> rerankResult = reranker.rerank(results);

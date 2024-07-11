@@ -37,8 +37,8 @@ public class DefaultWebRetriever implements WebRetriever {
                 {
                   "api_key": "\{apiKey}",
                   "query": "\{query}",
-                  "search_depth": "basic",
-                  "include_answer": false,
+                  "search_depth": "advanced",
+                  "include_answer": true,
                   "include_images": true,
                   "include_raw_content": false,
                   "max_results": 5,
